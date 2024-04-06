@@ -1,6 +1,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
+#include <gtc/type_ptr.hpp>
+#include <gtc/matrix_transform.hpp>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -10,6 +12,13 @@
 #define WINDOW_HEIGHT 480
 
 std::vector<GLuint> compiledPrograms;
+
+
+struct GameObject {
+	glm::vec3 position = glm::vec3(0.f);
+	glm::vec3 forward = glm::vec3(0.f, 1.f, 0.f);
+	float fvelocity = 0.01f;
+};
 
 struct ShaderProgram {
 
@@ -25,6 +34,11 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 
 	glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
 	
+}
+
+glm::mat4 GenerateTranslationMatrix(glm::vec3 translation) {
+
+	return glm::translate(glm::mat4(1.0f), translation);
 }
 
 //Funcion que devolvera una string con todo el archivo leido
@@ -271,6 +285,8 @@ void main(){
 	//Inicializamos GLEW y controlamos errores
 	if (glewInit() == GLEW_OK) {
 
+		GameObject cube;
+
 		//Declarar vec2 para definir el offset
 		glm::vec2 offset = glm::vec2(0.f, 0.f);
 
@@ -301,20 +317,35 @@ void main(){
 		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);		
 
 		//Posición X e Y del punto
-		GLfloat punto[] = {
-			-0.5f, -0.25f, // Vértice superior izquierdo
-			 0.5f, -0.25f, // Vértice superior derecho
-			 0.0f,  0.6f, // Vértice inferior derecho
+		GLfloat cuboPuntos[] = {
+		-0.25f,  0.25f, -0.25f,
+		 0.25f,  0.25f, -0.25f,
+		-0.25f, -0.25f, -0.25f,
+		 0.25f, -0.25f, -0.25f,
+		 0.25f, -0.25f,  0.25f,
+		 0.25f,  0.25f, -0.25f,
+		 0.25f,  0.25f,  0.25f,
+		-0.25f,  0.25f, -0.25f,
+		-0.25f,  0.25f,  0.25f,
+		-0.25f, -0.25f, -0.25f,
+		-0.25f, -0.25f,  0.25f,
+		 0.25f, -0.25f,  0.25f,
+		-0.25f,  0.25f,  0.25f,
+		 0.25f,  0.25f,  0.25f
 		};
+
+		for (int i = 0; i < 42; i += 3) {
+			cuboPuntos[i] -= 0.70f; // Resta 1.0 a todas las coordenadas X
+		}
 
 		//Definimos modo de dibujo para cada cara
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Ponemos los valores en el VBO creado
-		glBufferData(GL_ARRAY_BUFFER, sizeof(punto), punto, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
 
 		//Indicamos donde almacenar y como esta distribuida la información
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
 		//Indicamos que la tarjeta gráfica puede usar el atributo 0
 		glEnableVertexAttribArray(0);
@@ -332,6 +363,10 @@ void main(){
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		//Generamos el game loop
+
+		float cubePosY = 0.0f;
+		bool directionUp = true;
+
 		while (!glfwWindowShouldClose(window)) {
 
 			//Pulleamos los eventos (botones, teclas, mouse...)
@@ -343,8 +378,28 @@ void main(){
 			//Definimos que queremos usar el VAO con los puntos
 			glBindVertexArray(vaoPuntos);
 
+			//Generar el modelo de la matriz MVP
+			glm::mat4 cubemodelMatrix = glm::mat4(1.0f);
+
+			//Calculamos la nueva posicion del cubo
+			cube.position = cube.position + cube.forward * cube.fvelocity;
+
+			//invertimos direccion si se sale de los limites
+			if (cube.position.y >= 0.5f || cube.position.y <= -0.5f) {
+
+				cube.forward = cube.forward * -1.f;
+			}
+
+			//Generar una matriz de traslacion
+			glm::mat4 cubetranslationMatrix = GenerateTranslationMatrix(cube.position);
+
+			//Aplico las matrices
+			cubemodelMatrix = cubetranslationMatrix * cubemodelMatrix;
+
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
+
 			//Definimos que queremos dibujar
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 			
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
