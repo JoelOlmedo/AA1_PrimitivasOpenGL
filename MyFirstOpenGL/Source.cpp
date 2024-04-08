@@ -17,7 +17,7 @@ std::vector<GLuint> compiledPrograms;
 struct GameObject {
 	glm::vec3 position = glm::vec3(0.f);
 	glm::vec3 forward = glm::vec3(0.f, 1.f, 0.f);
-	float fvelocity = 0.01f;
+	float fvelocity = 0.0005f;
 };
 
 struct ShaderProgram {
@@ -250,7 +250,7 @@ GLuint CreateProgram(const ShaderProgram& shaders) {
 	}
 }
 
-void main(){
+void main() {
 
 	//Definir semillas del rand según el tiempo
 	srand(static_cast<unsigned int>(time(NULL)));
@@ -280,12 +280,14 @@ void main(){
 	glEnable(GL_CULL_FACE);
 
 	//Indicamos lado del culling
-	glCullFace(GL_BACK);	
+	glCullFace(GL_BACK);
 
 	//Inicializamos GLEW y controlamos errores
 	if (glewInit() == GLEW_OK) {
 
 		GameObject cube;
+		GameObject piramide;
+		piramide.position = glm::vec3(0.7f, 0.0f, 0.0f);
 
 		//Declarar vec2 para definir el offset
 		glm::vec2 offset = glm::vec2(0.f, 0.f);
@@ -314,7 +316,7 @@ void main(){
 		glGenBuffers(1, &vboPuntos);
 
 		//Indico que el VBO activo es el que acabo de crear y que almacenará un array. Todos los VBO que genere se asignaran al último VAO que he hecho glBindVertexArray
-		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);		
+		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);
 
 		//Posición X e Y del punto
 		GLfloat cuboPuntos[] = {
@@ -334,15 +336,48 @@ void main(){
 		 0.25f,  0.25f,  0.25f
 		};
 
+		GLfloat piramidePuntos[] = {
+			// Base de la pirámide (más pequeña)
+		-0.25f, -0.25f, -0.25f,  // Vértice 1
+		 0.25f, -0.25f, -0.25f,  // Vértice 2
+		 0.25f, -0.25f,  0.25f,  // Vértice 3
+		-0.25f, -0.25f,  0.25f,  // Vértice 4
+
+		// Caras laterales
+		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
+		-0.25f, -0.25f, -0.25f,  // Vértice 1
+		-0.25f, -0.25f,  0.25f,  // Vértice 4
+
+		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
+		-0.25f, -0.25f,  0.25f,  // Vértice 4
+		 0.25f, -0.25f,  0.25f,  // Vértice 3
+
+		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
+		 0.25f, -0.25f,  0.25f,  // Vértice 3
+		 0.25f, -0.25f, -0.25f,  // Vértice 2
+
+		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
+		 0.25f, -0.25f, -0.25f,  // Vértice 2
+		-0.25f, -0.25f, -0.25f,  // Vértice 1
+		};
+
 		for (int i = 0; i < 42; i += 3) {
 			cuboPuntos[i] -= 0.70f; // Resta 1.0 a todas las coordenadas X
 		}
+
+		//for (int i = 0; i < 42; i += 3) {
+		//	piramidePuntos[i] += 1; // Suma 1.0 a todas las coordenadas X
+		//}
+
+
 
 		//Definimos modo de dibujo para cada cara
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Ponemos los valores en el VBO creado
-		glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(piramidePuntos), piramidePuntos, GL_DYNAMIC_DRAW);
+
 
 		//Indicamos donde almacenar y como esta distribuida la información
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
@@ -398,9 +433,31 @@ void main(){
 
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
 
+				//PIRAMIDE-------------------------------
+					//Generar el modelo de la matriz MVP
+					glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
+
+					//Calculamos la nueva posicion del cubo
+					piramide.position += piramide.forward * piramide.fvelocity;
+
+					//invertimos direccion si se sale de los limites
+					if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
+
+						piramide.forward = piramide.forward * -1.f;
+					}
+
+					//Generar una matriz de traslacion
+					glm::mat4 piramideTranslationMatrix = GenerateTranslationMatrix(piramide.position);
+
+					//Aplico las matrices
+					piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
+
+					glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
+
 			//Definimos que queremos dibujar
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-			
+			//glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
 
@@ -413,7 +470,8 @@ void main(){
 		glUseProgram(0);
 		glDeleteProgram(compiledPrograms[0]);
 
-	}else {
+	}
+	else {
 		std::cout << "Ha petao." << std::endl;
 		glfwTerminate();
 	}
