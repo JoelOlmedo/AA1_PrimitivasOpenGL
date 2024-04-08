@@ -8,6 +8,8 @@
 #include <fstream>
 #include <vector>
 #include <conio.h>
+#include <thread>
+#include <chrono>
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -22,6 +24,15 @@ struct GameObject {
 float fVelocity = 0.0005f;
 bool pause = false;
 bool wireframeMode;
+
+enum color
+{
+	RED,
+	GREEN,
+	YELLOW
+};
+
+color colorPiramide = RED;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	
@@ -75,7 +86,7 @@ struct ShaderProgram {
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
 
-	//Definir nuevo tamaño del viewport
+	//Definir nuevo tamaï¿½o del viewport
 	glViewport(0, 0, iFrameBufferWidth, iFrameBufferHeight);
 
 	glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
@@ -121,13 +132,13 @@ GLuint LoadFragmentShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el fragment shader con su código fuente
+	//Vinculamos el fragment shader con su cï¿½digo fuente
 	glShaderSource(fragmentShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el fragment shader
 	glCompileShader(fragmentShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 
@@ -163,13 +174,13 @@ GLuint LoadGeometryShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el vertex shader con su código fuente
+	//Vinculamos el vertex shader con su cï¿½digo fuente
 	glShaderSource(geometryShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el vertex shader
 	glCompileShader(geometryShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
 
@@ -204,13 +215,13 @@ GLuint LoadVertexShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el vertex shader con su código fuente
+	//Vinculamos el vertex shader con su cï¿½digo fuente
 	glShaderSource(vertexShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el vertex shader
 	glCompileShader(vertexShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
@@ -235,7 +246,7 @@ GLuint LoadVertexShader(const std::string& filePath) {
 	}
 }
 
-//Función que dado un struct que contiene los shaders de un programa generara el programa entero de la GPU
+//Funciï¿½n que dado un struct que contiene los shaders de un programa generara el programa entero de la GPU
 GLuint CreateProgram(const ShaderProgram& shaders) {
 
 	//Crear programa de la GPU
@@ -296,11 +307,35 @@ GLuint CreateProgram(const ShaderProgram& shaders) {
 	}
 }
 
+void contador() {
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		std::cout << "Han pasado 2 segundos." << std::endl;
+		switch (colorPiramide)
+		{
+		case RED:
+			colorPiramide = GREEN;
+			break;
+		case GREEN:
+			colorPiramide = YELLOW;
+			break;
+		case YELLOW:
+			colorPiramide = RED;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void main() {
 
-	//Definir semillas del rand según el tiempo
+	//Definir semillas del rand segï¿½n el tiempo
 	srand(static_cast<unsigned int>(time(NULL)));
 
+	//timer
+	std::thread t(contador); // Inicia el hilo del contador
+	t.detach(); // Permite que el hilo se ejecute en segundo plano
 
 	//Inicializamos GLFW para gestionar ventanas e inputs
 	glfwInit();
@@ -317,7 +352,7 @@ void main() {
 	//Cargamos los inputs
 	glfwSetKeyCallback(window, KeyCallback);
 
-	//Asignamos función de callback para cuando el frame buffer es modificado
+	//Asignamos funciï¿½n de callback para cuando el frame buffer es modificado
 	glfwSetFramebufferSizeCallback(window, Resize_Window);
 
 	//Definimos espacio de trabajo
@@ -337,6 +372,11 @@ void main() {
 		GameObject cube;
 		GameObject piramide;
 		piramide.position = glm::vec3(0.7f, 0.0f, 0.0f);
+		float anglePiramide = 0.0f;
+		glm::vec3 currentColorPiramide = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		//Colores 
+		glm::vec3 redColor = glm::vec3(0.0f, 1.0f, 0.0f);
 
 		//Declarar vec2 para definir el offset
 		glm::vec2 offset = glm::vec2(0.f, 0.f);
@@ -364,10 +404,10 @@ void main() {
 		//Definimos cantidad de vbo a crear y donde almacenarlos
 		glGenBuffers(1, &vboPuntos);
 
-		//Indico que el VBO activo es el que acabo de crear y que almacenará un array. Todos los VBO que genere se asignaran al último VAO que he hecho glBindVertexArray
+		//Indico que el VBO activo es el que acabo de crear y que almacenarï¿½ un array. Todos los VBO que genere se asignaran al ï¿½ltimo VAO que he hecho glBindVertexArray
 		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);
 
-		//Posición X e Y del punto
+		//Posiciï¿½n X e Y del punto
 		GLfloat cuboPuntos[] = {
 		-0.25f,  0.25f, -0.25f,
 		 0.25f,  0.25f, -0.25f,
@@ -386,28 +426,28 @@ void main() {
 		};
 
 		GLfloat piramidePuntos[] = {
-		// Base de la pirámide (más pequeña)
-		-0.25f, -0.25f, -0.25f,  // Vértice 1
-		 0.25f, -0.25f, -0.25f,  // Vértice 2
-		 0.25f, -0.25f,  0.25f,  // Vértice 3
-		-0.25f, -0.25f,  0.25f,  // Vértice 4
+		// Base de la pirï¿½mide (mï¿½s pequeï¿½a)
+		-0.25f, -0.25f, -0.25f,  // Vï¿½rtice 1
+		 0.25f, -0.25f, -0.25f,  // Vï¿½rtice 2
+		 0.25f, -0.25f,  0.25f,  // Vï¿½rtice 3
+		-0.25f, -0.25f,  0.25f,  // Vï¿½rtice 4
 
 		// Caras laterales
-		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
-		-0.25f, -0.25f, -0.25f,  // Vértice 1
-		-0.25f, -0.25f,  0.25f,  // Vértice 4
+		0.0f,  0.25f,  0.0f,  // Vï¿½rtice 5 (punta)
+		-0.25f, -0.25f, -0.25f,  // Vï¿½rtice 1
+		-0.25f, -0.25f,  0.25f,  // Vï¿½rtice 4
 
-		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
-		-0.25f, -0.25f,  0.25f,  // Vértice 4
-		 0.25f, -0.25f,  0.25f,  // Vértice 3
+		0.0f,  0.25f,  0.0f,  // Vï¿½rtice 5 (punta)
+		-0.25f, -0.25f,  0.25f,  // Vï¿½rtice 4
+		 0.25f, -0.25f,  0.25f,  // Vï¿½rtice 3
 
-		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
-		 0.25f, -0.25f,  0.25f,  // Vértice 3
-		 0.25f, -0.25f, -0.25f,  // Vértice 2
+		0.0f,  0.25f,  0.0f,  // Vï¿½rtice 5 (punta)
+		 0.25f, -0.25f,  0.25f,  // Vï¿½rtice 3
+		 0.25f, -0.25f, -0.25f,  // Vï¿½rtice 2
 
-		0.0f,  0.25f,  0.0f,  // Vértice 5 (punta)
-		 0.25f, -0.25f, -0.25f,  // Vértice 2
-		-0.25f, -0.25f, -0.25f,  // Vértice 1
+		0.0f,  0.25f,  0.0f,  // Vï¿½rtice 5 (punta)
+		 0.25f, -0.25f, -0.25f,  // Vï¿½rtice 2
+		-0.25f, -0.25f, -0.25f,  // Vï¿½rtice 1
 		};
 
 		for (int i = 0; i < 42; i += 3) {
@@ -424,14 +464,14 @@ void main() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Ponemos los valores en el VBO creado
-		glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(piramidePuntos), piramidePuntos, GL_DYNAMIC_DRAW);
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(piramidePuntos), piramidePuntos, GL_DYNAMIC_DRAW);
 
 
-		//Indicamos donde almacenar y como esta distribuida la información
+		//Indicamos donde almacenar y como esta distribuida la informaciï¿½n
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-		//Indicamos que la tarjeta gráfica puede usar el atributo 0
+		//Indicamos que la tarjeta grï¿½fica puede usar el atributo 0
 		glEnableVertexAttribArray(0);
 
 		//Desvinculamos VBO
@@ -485,29 +525,49 @@ void main() {
 				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
 
 				//PIRAMIDE-------------------------------
+					//aplicamos color
+					switch (colorPiramide)
+					{
+					case RED:
+						currentColorPiramide = glm::vec3(1.0f, 0.0f, 0.0f);
+						break;
+					case GREEN:
+						currentColorPiramide = glm::vec3(0.0f, 1.0f, 0.0f);
+						break;
+					case YELLOW:
+						currentColorPiramide = glm::vec3(0.0f, 0.0f, 1.0f);
+						break;
+					default:
+						break;
+					}
+					glUniform3fv(glGetUniformLocation(compiledPrograms[0], "objectColor"), 1, glm::value_ptr(currentColorPiramide));
+
 					//Generar el modelo de la matriz MVP
-				glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
+					glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
 
-				//Calculamos la nueva posicion del cubo
-				piramide.position += piramide.forward * fVelocity;
+					//Rotaciï¿½n
+					piramideModelMatrix = glm::rotate(piramideModelMatrix, glm::radians(anglePiramide), glm::vec3(1.0f, 1.0f, 0.0f));
 
-				//invertimos direccion si se sale de los limites
-				if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
+					//Calculamos la nueva posicion del cubo
+					piramide.position += piramide.forward * fVelocity;
 
-					piramide.forward = piramide.forward * -1.f;
-				}
+					//invertimos direccion si se sale de los limites
+					if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
 
-				//Generar una matriz de traslacion
-				glm::mat4 piramideTranslationMatrix = GenerateTranslationMatrix(piramide.position);
+						piramide.forward = piramide.forward * -1.f;
+					}
 
-				//Aplico las matrices
-				piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
+					//Generar una matriz de traslacion
+					glm::mat4 piramideTranslationMatrix = GenerateTranslationMatrix(piramide.position);
 
-				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
+					//Aplico las matrices
+					piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
+
+					glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
 
 				//Definimos que queremos dibujar
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-				//glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+				//glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
 				//Dejamos de usar el VAO indicado anteriormente
 				glBindVertexArray(0);
@@ -515,6 +575,8 @@ void main() {
 				//Cambiamos buffers
 				glFlush();
 				glfwSwapBuffers(window);
+
+				anglePiramide += fVelocity * 10;
 			}
 
 			
