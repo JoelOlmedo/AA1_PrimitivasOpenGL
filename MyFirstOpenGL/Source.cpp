@@ -21,6 +21,7 @@ struct GameObject {
 
 float fVelocity = 0.0005f;
 bool pause = false;
+bool wireframeMode;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	
@@ -33,6 +34,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_N && action == GLFW_PRESS) {
 			std::cout << "Transformations velocity -10%" << std::endl;
 			fVelocity -= fVelocity * 0.1f;
+		}
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+			wireframeMode = !wireframeMode;
+			if (wireframeMode) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
+			}
+			else {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); 
+			}
 		}
 	}
 	
@@ -327,6 +337,7 @@ void main() {
 		GameObject cube;
 		GameObject piramide;
 		piramide.position = glm::vec3(0.7f, 0.0f, 0.0f);
+		float anglePiramide = 0.0f;
 
 		//Declarar vec2 para definir el offset
 		glm::vec2 offset = glm::vec2(0.f, 0.f);
@@ -414,8 +425,8 @@ void main() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Ponemos los valores en el VBO creado
-		glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(piramidePuntos), piramidePuntos, GL_DYNAMIC_DRAW);
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(piramidePuntos), piramidePuntos, GL_DYNAMIC_DRAW);
 
 
 		//Indicamos donde almacenar y como esta distribuida la información
@@ -475,29 +486,36 @@ void main() {
 				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
 
 				//PIRAMIDE-------------------------------
+					//aplicamos color
+					
+
+
 					//Generar el modelo de la matriz MVP
-				glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
+					glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
 
-				//Calculamos la nueva posicion del cubo
-				piramide.position += piramide.forward * fVelocity;
+					//Rotación
+					piramideModelMatrix = glm::rotate(piramideModelMatrix, glm::radians(anglePiramide), glm::vec3(1.0f, 1.0f, 0.0f));
 
-				//invertimos direccion si se sale de los limites
-				if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
+					//Calculamos la nueva posicion del cubo
+					piramide.position += piramide.forward * fVelocity;
 
-					piramide.forward = piramide.forward * -1.f;
-				}
+					//invertimos direccion si se sale de los limites
+					if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
 
-				//Generar una matriz de traslacion
-				glm::mat4 piramideTranslationMatrix = GenerateTranslationMatrix(piramide.position);
+						piramide.forward = piramide.forward * -1.f;
+					}
 
-				//Aplico las matrices
-				piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
+					//Generar una matriz de traslacion
+					glm::mat4 piramideTranslationMatrix = GenerateTranslationMatrix(piramide.position);
 
-				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
+					//Aplico las matrices
+					piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
+
+					glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
 
 				//Definimos que queremos dibujar
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-				//glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+				//glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
 				//Dejamos de usar el VAO indicado anteriormente
 				glBindVertexArray(0);
@@ -505,6 +523,8 @@ void main() {
 				//Cambiamos buffers
 				glFlush();
 				glfwSwapBuffers(window);
+
+				anglePiramide += fVelocity * 10;
 			}
 
 			
