@@ -7,18 +7,37 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <conio.h>
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
 std::vector<GLuint> compiledPrograms;
 
-
 struct GameObject {
 	glm::vec3 position = glm::vec3(0.f);
 	glm::vec3 forward = glm::vec3(0.f, 1.f, 0.f);
-	float fvelocity = 0.0005f;
 };
+
+float fVelocity = 0.0005f;
+
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	
+
+	if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+		std::cout << "Transformations velocity +10%" << std::endl;
+		fVelocity = fVelocity * 1.1f;
+	}
+	if (key == GLFW_KEY_N && action == GLFW_PRESS) {
+		std::cout << "Transformations velocity -10%" << std::endl;
+		fVelocity -= fVelocity * 0.1f;
+	}
+}
+
+	struct InputManager
+	{
+		float fvelocity = 0.0005f;
+	};
 
 struct ShaderProgram {
 
@@ -255,6 +274,7 @@ void main() {
 	//Definir semillas del rand según el tiempo
 	srand(static_cast<unsigned int>(time(NULL)));
 
+
 	//Inicializamos GLFW para gestionar ventanas e inputs
 	glfwInit();
 
@@ -266,6 +286,9 @@ void main() {
 
 	//Inicializamos la ventana
 	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "My Engine", NULL, NULL);
+
+	//Cargamos los inputs
+	glfwSetKeyCallback(window, KeyCallback);
 
 	//Asignamos función de callback para cuando el frame buffer es modificado
 	glfwSetFramebufferSizeCallback(window, Resize_Window);
@@ -284,7 +307,6 @@ void main() {
 
 	//Inicializamos GLEW y controlamos errores
 	if (glewInit() == GLEW_OK) {
-
 		GameObject cube;
 		GameObject piramide;
 		piramide.position = glm::vec3(0.7f, 0.0f, 0.0f);
@@ -362,7 +384,7 @@ void main() {
 		};
 
 		for (int i = 0; i < 42; i += 3) {
-			cuboPuntos[i] -= 0.70f; // Resta 1.0 a todas las coordenadas X
+			cuboPuntos[i] -= 1.4; // Resta 1.0 a todas las coordenadas X
 		}
 
 		//for (int i = 0; i < 42; i += 3) {
@@ -375,8 +397,8 @@ void main() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Ponemos los valores en el VBO creado
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(piramidePuntos), piramidePuntos, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(piramidePuntos), piramidePuntos, GL_DYNAMIC_DRAW);
 
 
 		//Indicamos donde almacenar y como esta distribuida la información
@@ -417,7 +439,7 @@ void main() {
 			glm::mat4 cubemodelMatrix = glm::mat4(1.0f);
 
 			//Calculamos la nueva posicion del cubo
-			cube.position = cube.position + cube.forward * cube.fvelocity;
+			cube.position = cube.position + cube.forward * fVelocity;
 
 			//invertimos direccion si se sale de los limites
 			if (cube.position.y >= 0.5f || cube.position.y <= -0.5f) {
@@ -438,7 +460,7 @@ void main() {
 					glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
 
 					//Calculamos la nueva posicion del cubo
-					piramide.position += piramide.forward * piramide.fvelocity;
+					piramide.position += piramide.forward * fVelocity;
 
 					//invertimos direccion si se sale de los limites
 					if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
@@ -455,8 +477,8 @@ void main() {
 					glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
 
 			//Definimos que queremos dibujar
-			//glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+			//glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
