@@ -16,7 +16,9 @@ std::vector<GLuint> compiledPrograms;
 
 struct GameObject {
 	glm::vec3 position = glm::vec3(0.f);
+	glm::vec3 rotation = glm::vec3(0.f);
 	glm::vec3 forward = glm::vec3(0.f, 1.f, 0.f);
+	float fAngularVelocity = 0.05f;
 };
 
 float fVelocity = 0.0005f;
@@ -85,6 +87,11 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 glm::mat4 GenerateTranslationMatrix(glm::vec3 translation) {
 
 	return glm::translate(glm::mat4(1.0f), translation);
+}
+
+glm::mat4 GenerateRotationMatrix(glm::vec3 axis, float fDegrees) {
+
+	return glm::rotate(glm::mat4(1.0f), glm::radians(fDegrees), glm::normalize(axis));
 }
 
 //Funcion que devolvera una string con todo el archivo leido
@@ -411,7 +418,7 @@ void main() {
 		};
 
 		for (int i = 0; i < 42; i += 3) {
-			cuboPuntos[i] -= 1.4; // Resta 1.0 a todas las coordenadas X
+			cuboPuntos[i] -= 0.7; // Resta 1.0 a todas las coordenadas X
 		}
 
 		//for (int i = 0; i < 42; i += 3) {
@@ -421,7 +428,7 @@ void main() {
 
 
 		//Definimos modo de dibujo para cada cara
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
@@ -463,12 +470,13 @@ void main() {
 
 				//Definimos que queremos usar el VAO con los puntos
 				glBindVertexArray(vaoPuntos);
-
+				
 				//Generar el modelo de la matriz MVP
 				glm::mat4 cubemodelMatrix = glm::mat4(1.0f);
 
 				//Calculamos la nueva posicion del cubo
 				cube.position = cube.position + cube.forward * fVelocity;
+				cube.rotation = cube.rotation + glm::vec3(0.f, 0.05f, 0.f) * cube.fAngularVelocity;
 
 				//invertimos direccion si se sale de los limites
 				if (cube.position.y >= 0.5f || cube.position.y <= -0.5f) {
@@ -478,15 +486,27 @@ void main() {
 
 				//Generar una matriz de traslacion
 				glm::mat4 cubetranslationMatrix = GenerateTranslationMatrix(cube.position);
+				glm::mat4 cubeRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 1.f, 0.f), cube.rotation.y);
 
 				//Aplico las matrices
-				cubemodelMatrix = cubetranslationMatrix * cubemodelMatrix;
+				cubemodelMatrix = cubetranslationMatrix * cubeRotationMatrix * cubemodelMatrix;
 
 				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
 
+				// Calcula la posición vertical del cubo con respecto al centro de la ventana
+				float verticalPosition = (cube.position.y + 1.0f) * (WINDOW_HEIGHT / 2);
+
+				// Establece el color del cubo basado en su posición vertical
+				if (verticalPosition > WINDOW_HEIGHT / 2) {
+					glUniform3f(glGetUniformLocation(compiledPrograms[0], "colorAbove"), 1.0f, 1.0f, 0.0f); // Azul
+				}
+				else {
+					glUniform3f(glGetUniformLocation(compiledPrograms[0], "colorBelow"), 1.0f, 0.5f, 0.0f); // Rojo
+				}
+
 				//PIRAMIDE-------------------------------
 					//Generar el modelo de la matriz MVP
-				glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
+				/*glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
 
 				//Calculamos la nueva posicion del cubo
 				piramide.position += piramide.forward * fVelocity;
@@ -503,7 +523,7 @@ void main() {
 				//Aplico las matrices
 				piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
 
-				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));*/
 
 				//Definimos que queremos dibujar
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
