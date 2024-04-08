@@ -21,9 +21,12 @@ struct GameObject {
 	glm::vec3 forward = glm::vec3(0.f, 1.f, 0.f);
 };
 
+//Variables comunes
 float fVelocity = 0.0005f;
 bool pause = false;
 bool wireframeMode;
+bool printPiramide;
+bool printCube;
 
 enum color
 {
@@ -45,6 +48,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_N && action == GLFW_PRESS) {
 			std::cout << "Transformations velocity -10%" << std::endl;
 			fVelocity -= fVelocity * 0.1f;
+		}
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+			std::cout << "Cube" << std::endl;
+			printCube = !printCube;
+		}
+		if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
+			std::cout << "Piramide" << std::endl;
+			printPiramide = !printPiramide;
 		}
 		if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
 			wireframeMode = !wireframeMode;
@@ -566,8 +577,10 @@ void main() {
 					glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
 
 				//Definimos que queremos dibujar
+				//if(!printCube)
 				//glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+				if(!printPiramide)
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
 				//Dejamos de usar el VAO indicado anteriormente
 				glBindVertexArray(0);
