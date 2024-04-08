@@ -8,6 +8,8 @@
 #include <fstream>
 #include <vector>
 #include <conio.h>
+#include <thread>
+#include <chrono>
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -22,6 +24,15 @@ struct GameObject {
 float fVelocity = 0.0005f;
 bool pause = false;
 bool wireframeMode;
+
+enum color
+{
+	RED,
+	GREEN,
+	YELLOW
+};
+
+color colorPiramide = RED;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	
@@ -296,11 +307,35 @@ GLuint CreateProgram(const ShaderProgram& shaders) {
 	}
 }
 
+void contador() {
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		std::cout << "Han pasado 2 segundos." << std::endl;
+		switch (colorPiramide)
+		{
+		case RED:
+			colorPiramide = GREEN;
+			break;
+		case GREEN:
+			colorPiramide = YELLOW;
+			break;
+		case YELLOW:
+			colorPiramide = RED;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void main() {
 
 	//Definir semillas del rand según el tiempo
 	srand(static_cast<unsigned int>(time(NULL)));
 
+	//timer
+	std::thread t(contador); // Inicia el hilo del contador
+	t.detach(); // Permite que el hilo se ejecute en segundo plano
 
 	//Inicializamos GLFW para gestionar ventanas e inputs
 	glfwInit();
@@ -338,6 +373,10 @@ void main() {
 		GameObject piramide;
 		piramide.position = glm::vec3(0.7f, 0.0f, 0.0f);
 		float anglePiramide = 0.0f;
+		glm::vec3 currentColorPiramide = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		//Colores 
+		glm::vec3 redColor = glm::vec3(0.0f, 1.0f, 0.0f);
 
 		//Declarar vec2 para definir el offset
 		glm::vec2 offset = glm::vec2(0.f, 0.f);
@@ -487,8 +526,21 @@ void main() {
 
 				//PIRAMIDE-------------------------------
 					//aplicamos color
-					
-
+					switch (colorPiramide)
+					{
+					case RED:
+						currentColorPiramide = glm::vec3(1.0f, 0.0f, 0.0f);
+						break;
+					case GREEN:
+						currentColorPiramide = glm::vec3(0.0f, 1.0f, 0.0f);
+						break;
+					case YELLOW:
+						currentColorPiramide = glm::vec3(0.0f, 0.0f, 1.0f);
+						break;
+					default:
+						break;
+					}
+					glUniform3fv(glGetUniformLocation(compiledPrograms[0], "objectColor"), 1, glm::value_ptr(currentColorPiramide));
 
 					//Generar el modelo de la matriz MVP
 					glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
