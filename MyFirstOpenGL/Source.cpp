@@ -27,6 +27,8 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 	
 }
 
+
+
 //Funcion que devolvera una string con todo el archivo leido
 std::string Load_File(const std::string& filePath) {
 
@@ -275,6 +277,7 @@ void main(){
 		glm::vec2 offset = glm::vec2(0.f, 0.f);
 
 		//Compilar shaders
+		//Cargamos los 3 archivos externos
 		ShaderProgram myFirstProgram;
 		myFirstProgram.vertexShader = LoadVertexShader("MyFirstVertexShader.glsl");
 		myFirstProgram.geometryShader = LoadGeometryShader("MyFirstGeometryShader.glsl");
@@ -283,7 +286,7 @@ void main(){
 		//Compilar programa
 		compiledPrograms.push_back(CreateProgram(myFirstProgram));
 
-		//Definimos color para limpiar el buffer de color
+		//Definimos color para limpiar el buffer de color (Color del fondo)
 		glClearColor(0.f, 0.f, 0.f, 1.f);
 
 		GLuint vaoPuntos, vboPuntos;
@@ -301,17 +304,19 @@ void main(){
 		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);		
 
 		//Posición X e Y del punto
-		GLfloat punto[] = {
+		GLfloat piramide[] = {
 			-0.5f, -0.25f, // Vértice superior izquierdo
 			 0.5f, -0.25f, // Vértice superior derecho
 			 0.0f,  0.6f, // Vértice inferior derecho
+
+			 
 		};
 
 		//Definimos modo de dibujo para cada cara
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Ponemos los valores en el VBO creado
-		glBufferData(GL_ARRAY_BUFFER, sizeof(punto), punto, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(piramide), piramide, GL_STATIC_DRAW);
 
 		//Indicamos donde almacenar y como esta distribuida la información
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
