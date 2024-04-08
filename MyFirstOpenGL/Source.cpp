@@ -20,7 +20,7 @@ struct ShaderProgram {
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
 
-	//Definir nuevo tamaño del viewport
+	//Definir nuevo tamaï¿½o del viewport
 	glViewport(0, 0, iFrameBufferWidth, iFrameBufferHeight);
 
 	glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
@@ -63,13 +63,13 @@ GLuint LoadFragmentShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el fragment shader con su código fuente
+	//Vinculamos el fragment shader con su cï¿½digo fuente
 	glShaderSource(fragmentShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el fragment shader
 	glCompileShader(fragmentShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 
@@ -105,13 +105,13 @@ GLuint LoadGeometryShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el vertex shader con su código fuente
+	//Vinculamos el vertex shader con su cï¿½digo fuente
 	glShaderSource(geometryShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el vertex shader
 	glCompileShader(geometryShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
 
@@ -146,13 +146,13 @@ GLuint LoadVertexShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el vertex shader con su código fuente
+	//Vinculamos el vertex shader con su cï¿½digo fuente
 	glShaderSource(vertexShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el vertex shader
 	glCompileShader(vertexShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
@@ -177,7 +177,7 @@ GLuint LoadVertexShader(const std::string& filePath) {
 	}
 }
 
-//Función que dado un struct que contiene los shaders de un programa generara el programa entero de la GPU
+//Funciï¿½n que dado un struct que contiene los shaders de un programa generara el programa entero de la GPU
 GLuint CreateProgram(const ShaderProgram& shaders) {
 
 	//Crear programa de la GPU
@@ -240,7 +240,7 @@ GLuint CreateProgram(const ShaderProgram& shaders) {
 
 void main(){
 
-	//Definir semillas del rand según el tiempo
+	//Definir semillas del rand segï¿½n el tiempo
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	//Inicializamos GLFW para gestionar ventanas e inputs
@@ -255,7 +255,7 @@ void main(){
 	//Inicializamos la ventana
 	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "My Engine", NULL, NULL);
 
-	//Asignamos función de callback para cuando el frame buffer es modificado
+	//Asignamos funciï¿½n de callback para cuando el frame buffer es modificado
 	glfwSetFramebufferSizeCallback(window, Resize_Window);
 
 	//Definimos espacio de trabajo
@@ -300,14 +300,14 @@ void main(){
 		//Definimos cantidad de vbo a crear y donde almacenarlos
 		glGenBuffers(1, &vboPuntos);
 
-		//Indico que el VBO activo es el que acabo de crear y que almacenará un array. Todos los VBO que genere se asignaran al último VAO que he hecho glBindVertexArray
+		//Indico que el VBO activo es el que acabo de crear y que almacenarï¿½ un array. Todos los VBO que genere se asignaran al ï¿½ltimo VAO que he hecho glBindVertexArray
 		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);		
 
-		//Posición X e Y del punto
+		//Posiciï¿½n X e Y del punto
 		GLfloat piramide[] = {
-			-0.5f, -0.25f, // Vértice superior izquierdo
-			 0.5f, -0.25f, // Vértice superior derecho
-			 0.0f,  0.6f, // Vértice inferior derecho
+			-0.5f, -0.25f, // Vï¿½rtice superior izquierdo
+			 0.5f, -0.25f, // Vï¿½rtice superior derecho
+			 0.0f,  0.6f, // Vï¿½rtice inferior derecho
 
 			 
 		};
@@ -318,10 +318,10 @@ void main(){
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(piramide), piramide, GL_STATIC_DRAW);
 
-		//Indicamos donde almacenar y como esta distribuida la información
+		//Indicamos donde almacenar y como esta distribuida la informaciï¿½n
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
-		//Indicamos que la tarjeta gráfica puede usar el atributo 0
+		//Indicamos que la tarjeta grï¿½fica puede usar el atributo 0
 		glEnableVertexAttribArray(0);
 
 		//Desvinculamos VBO
