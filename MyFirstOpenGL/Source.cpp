@@ -20,17 +20,34 @@ struct GameObject {
 };
 
 float fVelocity = 0.0005f;
+bool pause = false;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	
-
-	if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-		std::cout << "Transformations velocity +10%" << std::endl;
-		fVelocity = fVelocity * 1.1f;
+	if (!pause)
+	{
+		if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+			std::cout << "Transformations velocity +10%" << std::endl;
+			fVelocity = fVelocity * 1.1f;
+		}
+		if (key == GLFW_KEY_N && action == GLFW_PRESS) {
+			std::cout << "Transformations velocity -10%" << std::endl;
+			fVelocity -= fVelocity * 0.1f;
+		}
 	}
-	if (key == GLFW_KEY_N && action == GLFW_PRESS) {
-		std::cout << "Transformations velocity -10%" << std::endl;
-		fVelocity -= fVelocity * 0.1f;
+	
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		
+		if (pause)
+		{
+			pause = false;
+			std::cout << "Reanudar Programa" << std::endl;
+		}
+		else
+		{
+			std::cout << "Pausar Programa" << std::endl;
+			pause = true;
+		}
 	}
 }
 
@@ -359,7 +376,7 @@ void main() {
 		};
 
 		GLfloat piramidePuntos[] = {
-			// Base de la pirámide (más pequeña)
+		// Base de la pirámide (más pequeña)
 		-0.25f, -0.25f, -0.25f,  // Vértice 1
 		 0.25f, -0.25f, -0.25f,  // Vértice 2
 		 0.25f, -0.25f,  0.25f,  // Vértice 3
@@ -428,64 +445,69 @@ void main() {
 
 			//Pulleamos los eventos (botones, teclas, mouse...)
 			glfwPollEvents();
+			if (pause == false)
+			{
+				
+				//Limpiamos los buffers
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-			//Limpiamos los buffers
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+				//Definimos que queremos usar el VAO con los puntos
+				glBindVertexArray(vaoPuntos);
 
-			//Definimos que queremos usar el VAO con los puntos
-			glBindVertexArray(vaoPuntos);
+				//Generar el modelo de la matriz MVP
+				glm::mat4 cubemodelMatrix = glm::mat4(1.0f);
 
-			//Generar el modelo de la matriz MVP
-			glm::mat4 cubemodelMatrix = glm::mat4(1.0f);
+				//Calculamos la nueva posicion del cubo
+				cube.position = cube.position + cube.forward * fVelocity;
 
-			//Calculamos la nueva posicion del cubo
-			cube.position = cube.position + cube.forward * fVelocity;
+				//invertimos direccion si se sale de los limites
+				if (cube.position.y >= 0.5f || cube.position.y <= -0.5f) {
 
-			//invertimos direccion si se sale de los limites
-			if (cube.position.y >= 0.5f || cube.position.y <= -0.5f) {
+					cube.forward = cube.forward * -1.f;
+				}
 
-				cube.forward = cube.forward * -1.f;
-			}
+				//Generar una matriz de traslacion
+				glm::mat4 cubetranslationMatrix = GenerateTranslationMatrix(cube.position);
 
-			//Generar una matriz de traslacion
-			glm::mat4 cubetranslationMatrix = GenerateTranslationMatrix(cube.position);
+				//Aplico las matrices
+				cubemodelMatrix = cubetranslationMatrix * cubemodelMatrix;
 
-			//Aplico las matrices
-			cubemodelMatrix = cubetranslationMatrix * cubemodelMatrix;
-
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
 
 				//PIRAMIDE-------------------------------
 					//Generar el modelo de la matriz MVP
-					glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
+				glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
 
-					//Calculamos la nueva posicion del cubo
-					piramide.position += piramide.forward * fVelocity;
+				//Calculamos la nueva posicion del cubo
+				piramide.position += piramide.forward * fVelocity;
 
-					//invertimos direccion si se sale de los limites
-					if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
+				//invertimos direccion si se sale de los limites
+				if (piramide.position.y >= 0.5f || piramide.position.y <= -0.5f) {
 
-						piramide.forward = piramide.forward * -1.f;
-					}
+					piramide.forward = piramide.forward * -1.f;
+				}
 
-					//Generar una matriz de traslacion
-					glm::mat4 piramideTranslationMatrix = GenerateTranslationMatrix(piramide.position);
+				//Generar una matriz de traslacion
+				glm::mat4 piramideTranslationMatrix = GenerateTranslationMatrix(piramide.position);
 
-					//Aplico las matrices
-					piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
+				//Aplico las matrices
+				piramideModelMatrix = piramideTranslationMatrix * piramideModelMatrix;
 
-					glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(piramideModelMatrix));
 
-			//Definimos que queremos dibujar
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-			//glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+				//Definimos que queremos dibujar
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				//glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
-			//Dejamos de usar el VAO indicado anteriormente
-			glBindVertexArray(0);
+				//Dejamos de usar el VAO indicado anteriormente
+				glBindVertexArray(0);
 
-			//Cambiamos buffers
-			glFlush();
-			glfwSwapBuffers(window);
+				//Cambiamos buffers
+				glFlush();
+				glfwSwapBuffers(window);
+			}
+
+			
 		}
 
 		//Desactivar y eliminar programa
