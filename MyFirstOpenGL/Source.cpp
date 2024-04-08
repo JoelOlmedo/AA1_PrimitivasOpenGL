@@ -21,6 +21,7 @@ struct GameObject {
 
 float fVelocity = 0.0005f;
 bool pause = false;
+bool wireframeMode;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	
@@ -33,6 +34,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_N && action == GLFW_PRESS) {
 			std::cout << "Transformations velocity -10%" << std::endl;
 			fVelocity -= fVelocity * 0.1f;
+		}
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+			wireframeMode = !wireframeMode;
+			if (wireframeMode) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
+			}
+			else {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); 
+			}
 		}
 	}
 	
