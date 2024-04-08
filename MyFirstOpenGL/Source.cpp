@@ -342,6 +342,7 @@ void main() {
 	//Inicializamos GLEW y controlamos errores
 	if (glewInit() == GLEW_OK) {
 		GameObject cube;
+		cube.position = glm::vec3(-0.65f, 0.0f, 0.0f);
 		GameObject piramide;
 		piramide.position = glm::vec3(0.7f, 0.0f, 0.0f);
 
@@ -417,9 +418,9 @@ void main() {
 		-0.25f, -0.25f, -0.25f,  // Vértice 1
 		};
 
-		for (int i = 0; i < 42; i += 3) {
-			cuboPuntos[i] -= 0.7; // Resta 1.0 a todas las coordenadas X
-		}
+		//for (int i = 0; i < 42; i += 3) {
+		//	cuboPuntos[i] -= 0.7; // Resta 1.0 a todas las coordenadas X
+		//}
 
 		//for (int i = 0; i < 42; i += 3) {
 		//	piramidePuntos[i] += 1; // Suma 1.0 a todas las coordenadas X
