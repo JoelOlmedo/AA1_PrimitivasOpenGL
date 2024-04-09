@@ -17,8 +17,10 @@ std::vector<GLuint> compiledPrograms;
 struct GameObject {
 	glm::vec3 position = glm::vec3(0.f);
 	glm::vec3 rotation = glm::vec3(0.f);
+	glm::vec3 scale = glm::vec3(1.f);
 	glm::vec3 forward = glm::vec3(0.f, 1.f, 0.f);
 	float fAngularVelocity = 0.05f;
+	float fScaleVelocity = 0.0001f;
 };
 
 float fVelocity = 0.0005f;
@@ -92,6 +94,11 @@ glm::mat4 GenerateTranslationMatrix(glm::vec3 translation) {
 glm::mat4 GenerateRotationMatrix(glm::vec3 axis, float fDegrees) {
 
 	return glm::rotate(glm::mat4(1.0f), glm::radians(fDegrees), glm::normalize(axis));
+}
+
+glm::mat4 GenerateScaleMatrix(glm::vec3 scaleAxis) {
+
+	return glm::scale(glm::mat4(1.0f),scaleAxis);
 }
 
 //Funcion que devolvera una string con todo el archivo leido
@@ -478,6 +485,12 @@ void main() {
 				//Calculamos la nueva posicion del cubo
 				cube.position = cube.position + cube.forward * fVelocity;
 				cube.rotation = cube.rotation + glm::vec3(0.f, 0.05f, 0.f) * cube.fAngularVelocity;
+				cube.scale = cube.scale + glm::vec3(0.f, 1.f, 0.f) * cube.fScaleVelocity;
+
+				if (cube.scale.y >= 3.f || cube.scale.y <= 1.f) {
+
+					cube.fScaleVelocity = cube.fScaleVelocity * -1.f;
+				}
 
 				//invertimos direccion si se sale de los limites
 				if (cube.position.y >= 0.5f || cube.position.y <= -0.5f) {
@@ -488,12 +501,13 @@ void main() {
 				//Generar una matriz de traslacion
 				glm::mat4 cubetranslationMatrix = GenerateTranslationMatrix(cube.position);
 				glm::mat4 cubeRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 1.f, 0.f), cube.rotation.y);
+				glm::mat4 cubeScaleMatrix = GenerateScaleMatrix(cube.scale);
 
 				//Aplico las matrices
-				cubemodelMatrix = cubetranslationMatrix * cubeRotationMatrix * cubemodelMatrix;
+				cubemodelMatrix = cubetranslationMatrix * cubeRotationMatrix * cubeScaleMatrix * cubemodelMatrix;
 
 				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
-
+				
 				// Calcula la posición vertical del cubo con respecto al centro de la ventana
 				float verticalPosition = (cube.position.y + 1.0f) * (WINDOW_HEIGHT / 2);
 
