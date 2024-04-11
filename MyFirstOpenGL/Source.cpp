@@ -543,9 +543,6 @@ void main() {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		//Indicar a la tarjeta GPU que programa debe usar
-		glUseProgram(compiledPrograms[1]);
-
 		//Asignar valores iniciales al programa
 		glUniform2f(glGetUniformLocation(compiledPrograms[1], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -560,6 +557,8 @@ void main() {
 				
 				//Limpiamos los buffers
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+				glUseProgram(compiledPrograms[1]);
 
 				//Definimos que queremos usar el VAO con los puntos
 				glBindVertexArray(vaoPuntos);
@@ -584,23 +583,25 @@ void main() {
 				//Aplico las matrices
 				cubemodelMatrix = cubetranslationMatrix * cubeRotationMatrix * cubemodelMatrix;
 
-				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[1], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
 				
 				// Calcula la posici�n vertical del cubo con respecto al centro de la ventana
 				float verticalPosition = (cube.position.y + 1.0f) * (WINDOW_HEIGHT / 2);
 
 				// Establece el color del cubo basado en su posici�n vertical
 				if (verticalPosition > WINDOW_HEIGHT / 2) {
-					glUniform3f(glGetUniformLocation(compiledPrograms[0], "colorAbove"), 1.0f, 1.0f, 0.0f); // Amarillo
+					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorAbove"), 1.0f, 1.0f, 0.0f); // Amarillo
 				}
 				else {
-					glUniform3f(glGetUniformLocation(compiledPrograms[0], "colorBelow"), 1.0f, 0.5f, 0.0f); // Naranja
+					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorBelow"), 1.0f, 0.5f, 0.0f); // Naranja
 				}
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 
 				//PIRAMIDE-------------------------------
-					//aplicamos color
+					
+				glUseProgram(compiledPrograms[0]);
+				//aplicamos color
 					switch (colorPiramide)
 					{
 					case RED:
@@ -646,6 +647,9 @@ void main() {
 				
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
+				//Ortoedro----------------------
+				glUseProgram(compiledPrograms[1]);
+
 				//Definimos que queremos usar el VAO con los puntos
 				glBindVertexArray(vaoOrtoedro);
 
@@ -668,24 +672,20 @@ void main() {
 				//Aplico las matrices
 				ortoedromodelMatrix = ortoedroRotationMatrix * ortoedroScaleMatrix * ortoedromodelMatrix;
 
-				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedromodelMatrix));
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[1], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedromodelMatrix));
 
 				// Calcula la posici�n vertical del cubo con respecto al centro de la ventana
 				float verticalPositionOrtoedro = (ortoedro.position.y + 1.0f) * (WINDOW_HEIGHT / 2);
 
 				// Establece el color del cubo basado en su posici�n vertical
 				if (verticalPositionOrtoedro > WINDOW_HEIGHT / 2) {
-					glUniform3f(glGetUniformLocation(compiledPrograms[0], "colorAbove"), 1.0f, 1.0f, 0.0f); // Amrillo
+					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorAbove"), 1.0f, 1.0f, 0.0f); // Amrillo
 				}
 				else {
-					glUniform3f(glGetUniformLocation(compiledPrograms[0], "colorBelow"), 1.0f, 0.5f, 0.0f); // Naranja
+					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorBelow"), 1.0f, 0.5f, 0.0f); // Naranja
 				}
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-				//if(!printCube)
-				//glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-				if(!printPiramide)
-					glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
 				//Dejamos de usar el VAO indicado anteriormente
 				glBindVertexArray(0);
