@@ -543,8 +543,7 @@ void main() {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		//Asignar valores iniciales al programa
-		glUniform2f(glGetUniformLocation(compiledPrograms[1], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
+		
 
 		//Generamos el game loop
 
@@ -559,6 +558,8 @@ void main() {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 				glUseProgram(compiledPrograms[1]);
+				//Asignar valores iniciales al programa
+				glUniform2f(glGetUniformLocation(compiledPrograms[1], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
 				//Definimos que queremos usar el VAO con los puntos
 				glBindVertexArray(vaoPuntos);
@@ -601,6 +602,9 @@ void main() {
 				//PIRAMIDE-------------------------------
 					
 				glUseProgram(compiledPrograms[0]);
+
+				//Asignar valores iniciales al programa
+				glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 				//aplicamos color
 					switch (colorPiramide)
 					{
@@ -649,6 +653,9 @@ void main() {
 
 				//Ortoedro----------------------
 				glUseProgram(compiledPrograms[1]);
+
+				//Asignar valores iniciales al programa
+				glUniform2f(glGetUniformLocation(compiledPrograms[1], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
 				//Definimos que queremos usar el VAO con los puntos
 				glBindVertexArray(vaoOrtoedro);
