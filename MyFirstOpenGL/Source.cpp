@@ -29,8 +29,9 @@ struct GameObject {
 float fVelocity = 0.0005f;
 bool pause = false;
 bool wireframeMode;
-bool printPiramide;
-bool printCube;
+bool printPiramide = true;
+bool printCube = true;
+bool printOrto = true;
 
 enum color
 {
@@ -53,9 +54,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			std::cout << "Transformations velocity -10%" << std::endl;
 			fVelocity -= fVelocity * 0.1f;
 		}
-		if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+		if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
 			std::cout << "Cube" << std::endl;
 			printCube = !printCube;
+		}
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+			std::cout << "Ortoedro" << std::endl;
+			printOrto = !printOrto;
 		}
 		if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
 			std::cout << "Piramide" << std::endl;
@@ -597,7 +602,11 @@ void main() {
 					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorBelow"), 1.0f, 0.5f, 0.0f); // Naranja
 				}
 
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				if (printCube)
+				{
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				}
+				
 
 				//PIRAMIDE-------------------------------
 					
@@ -649,7 +658,11 @@ void main() {
 
 				//Definimos que queremos dibujar
 				
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+				if (printPiramide)
+				{
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
+				}	
+				
 
 				//Ortoedro----------------------
 				glUseProgram(compiledPrograms[1]);
@@ -664,7 +677,7 @@ void main() {
 				glm::mat4 ortoedromodelMatrix = glm::mat4(1.0f);
 
 				//Calculamos la nueva posicion del cubo
-				ortoedro.rotation = ortoedro.rotation + glm::vec3(0.f, 0.05f, 0.f) * ortoedro.fAngularVelocity;
+				ortoedro.rotation = ortoedro.rotation + glm::vec3(0.f, 0.0f, 0.05f) * ortoedro.fAngularVelocity;
 				ortoedro.scale = ortoedro.scale + glm::vec3(0.f, 1.f, 0.f) * ortoedro.fScaleVelocity;
 
 				if (ortoedro.scale.y >= 3.f || ortoedro.scale.y <= 1.f) {
@@ -692,7 +705,10 @@ void main() {
 					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorBelow"), 1.0f, 0.5f, 0.0f); // Naranja
 				}
 
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				if (printOrto)
+				{
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				}
 
 				//Dejamos de usar el VAO indicado anteriormente
 				glBindVertexArray(0);
