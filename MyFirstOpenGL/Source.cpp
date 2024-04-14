@@ -92,10 +92,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 }
 
-	struct InputManager
-	{
-		float fvelocity = 0.0005f;
-	};
 
 struct ShaderProgram {
 
@@ -489,28 +485,28 @@ void main() {
 		};
 
 		GLfloat piramidePuntos[] = {
-		// Base de la pir�mide (m�s peque�a)
-		-0.25f, -0.25f, -0.25f,  // V�rtice 1
-		 0.25f, -0.25f, -0.25f,  // V�rtice 2
-		 0.25f, -0.25f,  0.25f,  // V�rtice 3
-		-0.25f, -0.25f,  0.25f,  // V�rtice 4
+		// Base de la piramide (mas pequeña)
+		-0.25f, -0.25f, -0.25f,  // Vertice 1
+		 0.25f, -0.25f, -0.25f,  // Vertice 2
+		 0.25f, -0.25f,  0.25f,  // Vertice 3
+		-0.25f, -0.25f,  0.25f,  // Vertice 4
 
 		// Caras laterales
-		0.0f,  0.25f,  0.0f,  // V�rtice 5 (punta)
-		-0.25f, -0.25f, -0.25f,  // V�rtice 1
-		-0.25f, -0.25f,  0.25f,  // V�rtice 4
+		0.0f,  0.25f,  0.0f,  // Vertice 5 (punta)
+		-0.25f, -0.25f, -0.25f,  // Vertice 1
+		-0.25f, -0.25f,  0.25f,  // Vertice 4
 
-		0.0f,  0.25f,  0.0f,  // V�rtice 5 (punta)
-		-0.25f, -0.25f,  0.25f,  // V�rtice 4
-		 0.25f, -0.25f,  0.25f,  // V�rtice 3
+		0.0f,  0.25f,  0.0f,  // Vertice 5 (punta)
+		-0.25f, -0.25f,  0.25f,  // Vertice 4
+		 0.25f, -0.25f,  0.25f,  // Vertice 3
 
-		0.0f,  0.25f,  0.0f,  // V�rtice 5 (punta)
-		 0.25f, -0.25f,  0.25f,  // V�rtice 3
-		 0.25f, -0.25f, -0.25f,  // V�rtice 2
+		0.0f,  0.25f,  0.0f,  // Vertice 5 (punta)
+		 0.25f, -0.25f,  0.25f,  // Vertice 3
+		 0.25f, -0.25f, -0.25f,  // Vertice 2
 
-		0.0f,  0.25f,  0.0f,  // V�rtice 5 (punta)
-		 0.25f, -0.25f, -0.25f,  // V�rtice 2
-		-0.25f, -0.25f, -0.25f,  // V�rtice 1
+		0.0f,  0.25f,  0.0f,  // Vertice 5 (punta)
+		 0.25f, -0.25f, -0.25f,  // Vertice 2
+		-0.25f, -0.25f, -0.25f,  // Vertice 1
 		};
 
 
@@ -519,11 +515,11 @@ void main() {
 
 		//Indico que el VAO activo de la GPU es el que acabo de crear
 		glBindVertexArray(vaoPuntos);
-		//Indico que el VBO activo es el que acabo de crear y que almacenar� un array. Todos los VBO que genere se asignaran al �ltimo VAO que he hecho glBindVertexArray
+		//Indico que el VBO activo es el que acabo de crear y que almacenar un array. Todos los VBO que genere se asignaran al �ltimo VAO que he hecho glBindVertexArray
 		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(cuboPuntos), cuboPuntos, GL_DYNAMIC_DRAW);
-		//Indicamos donde almacenar y como esta distribuida la informaci�n
+		//Indicamos donde almacenar y como esta distribuida la informacion
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 		//Indicamos que la tarjeta gr�fica puede usar el atributo 0
 		glEnableVertexAttribArray(0);
@@ -591,10 +587,10 @@ void main() {
 
 				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[1], "transform"), 1, GL_FALSE, glm::value_ptr(cubemodelMatrix));
 				
-				// Calcula la posici�n vertical del cubo con respecto al centro de la ventana
+				// Calcula la posicion vertical del cubo con respecto al centro de la ventana
 				float verticalPosition = (cube.position.y + 1.0f) * (WINDOW_HEIGHT / 2);
 
-				// Establece el color del cubo basado en su posici�n vertical
+				// Establece el color del cubo basado en su posicion vertical
 				if (verticalPosition > WINDOW_HEIGHT / 2) {
 					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorAbove"), 1.0f, 1.0f, 0.0f); // Amarillo
 				}
@@ -636,10 +632,10 @@ void main() {
 
 				glm::mat4 piramideModelMatrix = glm::mat4(1.0f);
 
-					//Rotaci�n
+					//Rotacion
 					piramideModelMatrix = glm::rotate(piramideModelMatrix, glm::radians(anglePiramide), glm::vec3(1.0f, 1.0f, 0.0f));
 
-					//Calculamos la nueva posicion del cubo
+					//Calculamos la nueva posicion de la piramide
 					piramide.position += piramide.forward * fVelocity;
 
 					//invertimos direccion si se sale de los limites
@@ -694,10 +690,10 @@ void main() {
 
 				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[1], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedromodelMatrix));
 
-				// Calcula la posici�n vertical del cubo con respecto al centro de la ventana
+				// Calcula la posici�n vertical del ortoedro con respecto al centro de la ventana
 				float verticalPositionOrtoedro = (ortoedro.position.y + 1.0f) * (WINDOW_HEIGHT / 2);
 
-				// Establece el color del cubo basado en su posici�n vertical
+				// Establece el color del ortoedro basado en su posici�n vertical
 				if (verticalPositionOrtoedro > WINDOW_HEIGHT / 2) {
 					glUniform3f(glGetUniformLocation(compiledPrograms[1], "colorAbove"), 1.0f, 1.0f, 0.0f); // Amrillo
 				}
